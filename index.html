@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi Một Nửa Thế Giới - 20/10 ✨</title>
+    <style>
+        /* Toàn bộ cấu trúc nền tối nghệ thuật */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050510;
+            font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        /* Canvas xử lý hiệu ứng pháo hoa và sao */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        /* Khung nội dung chính giữa màn hình */
+        .container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 600px;
+            width: 90%;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: #ff4d79;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(255, 77, 121, 0.6);
+            letter-spacing: 2px;
+        }
+        h2 {
+            color: #ffffff;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            font-weight: 300;
+            opacity: 0.8;
+        }
+        /* Vùng hiển thị chữ gõ tự động */
+        .typewriter-container {
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        .text-wish {
+            color: #e0e0e0;
+            font-size: 1.25rem;
+            line-height: 1.8;
+            font-style: italic;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        /* Hiệu ứng con trỏ nhấp nháy khi gõ chữ */
+        .cursor {
+            display: inline-block;
+            width: 3px;
+            background-color: #ff4d79;
+            margin-left: 5px;
+            animation: blink 0.7s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+        /* Thiết kế nút bấm chuyển đổi */
+        .btn-action {
+            background: linear-gradient(45deg, #ff4d79, #ff758c);
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 77, 121, 0.4);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        .btn-action:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 77, 121, 0.6);
+        }
+        .btn-action:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Lớp vẽ pháo hoa nền -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Khung thiệp tương tác -->
+    <div class="container">
+        <h1>Happy Women's Day</h1>
+        <h2>Chúc Mừng Ngày Phụ Nữ Việt Nam 20/10</h2>
+        
+        <div class="typewriter-container">
+            <p class="text-wish"><span id="words"></span><span class="cursor">&nbsp;</span></p>
+        </div>
+
+        <button class="btn-action" onclick="triggerNextWish()">Nhận lời chúc ngọt ngào 💖</button>
+    </div>
+
+    <script>
+        // --- 1. HỆ THỐNG XỬ LÝ LỜI CHÚC TYPEWRITER ---
+        const wishes = [
+            "Chúc bạn một ngày 20/10 thật hạnh phúc, luôn giữ trên môi nụ cười rạng rỡ và đón nhận nhiều điều ngọt ngào nhất!",
+            "Gửi tới người con gái tuyệt vời: Mong bạn luôn xinh đẹp, tự tin, kiên cường và tỏa sáng rực rỡ theo cách riêng của mình.",
+            "Chúc một nửa thế giới luôn ngập tràn niềm vui, công việc thuận lợi, vạn sự hanh thông và có một ngày lễ trọn vẹn yêu thương.",
+            "Mong rằng mỗi ngày trôi qua với bạn đều đặc biệt như ngày 20/10. Luôn hạnh phúc và yêu thương chính mình nhiều hơn nhé!",
+            "Chúc bạn luôn có đủ sự ấm áp để sưởi ấm trái tim, đủ nụ cười để thắp sáng những ngày tối tăm và đủ may mắn để đạt được ước mơ."
+        ];
+
+        let currentWishIdx = -1;
+        let isTyping = false;
+        const textContainer = document.getElementById('words');
+
+        function typeWriter(text, i = 0) {
+            if (i < text.length) {
+                textContainer.innerHTML += text.charAt(i);
+                setTimeout(() => typeWriter(text, i + 1), 40); // Tốc độ gõ: 40ms/ký tự
+            } else {
+                isTyping = false;
+            }
+        }
+
+        function triggerNextWish() {
+            if (isTyping) return; // Đang gõ thì không bấm tiếp được ngay
+            isTyping = true;
+            
+            let nextIdx;
+            do {
+                nextIdx = Math.floor(Math.random() * wishes.length);
+            } while (nextIdx === currentWishIdx);
+            
+            currentWishIdx = nextIdx;
+            textContainer.innerHTML = '';
+            typeWriter(wishes[currentWishIdx]);
+            
+            // Kích hoạt pháo hoa bùng nổ khi đổi câu chúc
+            explodeFireworks();
+        }
+
+        // --- 2. HỆ THỐNG XỬ LÝ PHÁO HOA TRÁI TIM & SAO LẤP LÁNH (CANVAS) ---
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        // Tạo mảng quản lý hạt pháo hoa và sao
+        let particles = [];
+        let stars = [];
+
+        // Khởi tạo nền sao lấp lánh ban đầu
+        for(let i = 0; i < 80; i++) {
+            stars.push({
+                x: Math.random() * width,
+                y: Math.random() * height * 0.7,
+                size: Math.random() * 1.5,
+                alpha: Math.random(),
+                speed: Math.random() * 0.02 + 0.005
+            });
+        }
+
+        class Particle {
+            constructor(x, y, color, angle, speed) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                // Vận tốc dựa trên góc bắn tạo hình trái tim
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.alpha = 1;
+                this.fade = Math.random() * 0.015 + 0.01;
+                this.gravity = 0.06;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += this.gravity; // Trọng lực kéo hạt rơi xuống
+                this.alpha -= this.fade;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                // Vẽ hạt pháo hoa hình tròn nhỏ bóng bẩy
+                ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Phương trình toán học tạo quỹ đạo hình trái tim cho pháo hoa
+        function explodeFireworks() {
+            const count = 120;
+            const colors = ['#ff4d79', '#ff758c', '#ff8e53', '#ff007f', '#ffb3c6'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Điểm nổ ngẫu nhiên quanh khu vực phía trên chiếc hộp
+            const originX = width / 2 + (Math.random() * 200 - 100);
+            const originY = height * 0.3 + (Math.random() * 100 - 50);
+
+            for (let i = 0; i < count; i++) {
+                const angle = (i / count) * Math.PI * 2;
+                
+                // Công thức toán học tạo dáng trái tim Cardioid / Parametric
+                const t = angle;
+                const rX = 16 * Math.pow(Math.sin(t), 3);
+                const rY = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                
+                // Tính toán góc và độ bung dựa trên hình dáng trái tim
+                const finalAngle = Math.atan2(rY, rX);
+                const baseSpeed = Math.sqrt(rX*rX + rY*rY) * 0.4; 
+
+                particles.push(new Particle(originX, originY, randomColor, finalAngle, baseSpeed));
+            }
+        }
+
+        // Vòng lặp Render chuyển động liên tục
+        function loop() {
+            // Hiệu ứng đuôi mờ cho pháo hoa (Motion Blur)
+            ctx.fillStyle = 'rgba(5, 5, 16, 0.2)';
+            ctx.fillRect(0, 0, width, height);
+
+            // Vẽ sao lấp lánh trên bầu trời
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if(star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+            });
+
+            // Cập nhật trạng thái và vẽ pháo hoa
+            particles = particles.filter(p => p.alpha > 0);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(loop);
+        }
+
+        // Chạy khởi tạo ban đầu khi mở trang web
+        loop();
+        triggerNextWish(); // Tự động chạy lời chúc đầu tiên
+    </script>
+</body>
+</html>
